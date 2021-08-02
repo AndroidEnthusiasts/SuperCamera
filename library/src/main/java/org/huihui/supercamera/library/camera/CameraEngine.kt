@@ -6,6 +6,7 @@ import org.huihui.supercamera.library.camera.camera.ICamera
 import org.huihui.supercamera.library.camera.preview.IPreview
 import org.huihui.supercamera.library.camera.render.AbsRender
 import org.huihui.supercamera.library.camera.render.CameraRender
+import org.huihui.supercamera.library.camera.render.ICameraRender
 import org.huihui.supercamera.library.camera.render.IRender
 
 /*
@@ -16,7 +17,7 @@ import org.huihui.supercamera.library.camera.render.IRender
  */
 class CameraEngine(
     camera: ICamera = Camera1(),
-    render: IRender = CameraRender(),
+    render: ICameraRender = CameraRender(),
     preview: IPreview,
     lifecycleOwner: LifecycleOwner
 ) : IRender.RenderListener {

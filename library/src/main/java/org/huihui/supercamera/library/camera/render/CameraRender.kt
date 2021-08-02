@@ -1,5 +1,7 @@
 package org.huihui.supercamera.library.camera.render
 
+import android.graphics.SurfaceTexture
+import androidx.annotation.CallSuper
 import org.huihui.supercamera.library.camera.filter.DisplayFilter
 import org.huihui.supercamera.library.camera.filter.IFilter
 import org.huihui.supercamera.library.camera.filter.OESFilter
@@ -12,19 +14,39 @@ import javax.microedition.khronos.opengles.GL10
  * @author 陈松辉
  * @date 2021/7/28 22:33
  */
-class CameraRender : AbsRender() {
+class CameraRender : AbsRender(), ICameraRender {
+
+    private val mInputSurfaceTexture = SurfaceTexture(0)
+
+    protected var textureWidth: Int = 0
+    protected var textureHeight: Int = 0
+
     private val oesFilter: IFilter
     private val displayFilter: IFilter
 
     init {
+        mInputSurfaceTexture.detachFromGLContext()
+
         oesFilter = OESFilter()
 
         displayFilter = DisplayFilter()
+    }
 
+    override fun getInputSurfaceTexture(): SurfaceTexture {
+        return mInputSurfaceTexture
+    }
+
+    override fun setTextureSize(textureWidth: Int, textureHeight: Int) {
+        this.textureWidth = textureWidth
+        this.textureHeight = textureHeight
+        notifySizeChange()
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         super.onSurfaceCreated(gl, config)
+
+        oesFilter.onInit()
+        displayFilter.onInit()
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
@@ -35,20 +57,22 @@ class CameraRender : AbsRender() {
     private fun notifySizeChange() {
         if (viewWidth != 0 && viewHeight != 0 && textureWidth != 0 && textureHeight != 0) {
             oesFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
+            displayFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
         }
     }
 
     override fun onSurfaceDestory() {
+        super.onSurfaceDestory()
+        mInputSurfaceTexture.detachFromGLContext()
+        textureHeight = 0
+        textureWidth = 0
         oesFilter.onDestroy()
+        displayFilter.onDestroy()
     }
 
-    override fun setTextureSize(textureWidth: Int, textureHeight: Int) {
-        super.setTextureSize(textureWidth, textureHeight)
-        notifySizeChange()
-    }
 
     override fun onDrawFrame(gl: GL10?) {
-        oesFilter
+//        oesFilter.onDrawFrame()
 
     }
 

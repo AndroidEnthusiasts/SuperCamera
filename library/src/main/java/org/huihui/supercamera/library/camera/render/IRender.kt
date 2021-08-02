@@ -22,10 +22,6 @@ interface IRender {
 
     fun onDrawFrame(gl: GL10?)
 
-    fun setTextureSize(textureWidth: Int, textureHeight: Int)
-
-    fun getInputSurfaceTexture(): SurfaceTexture
-
     interface RenderListener {
 
         fun onRenderReady()

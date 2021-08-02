@@ -12,31 +12,14 @@ import javax.microedition.khronos.opengles.GL10
  * @date 2021/7/23 9:40
  */
 abstract class AbsRender : IRender {
-    private val renderListener: IRender.RenderListener? = null
-    private val mInputSurfaceTexture = SurfaceTexture(0)
-
-    protected var textureWidth: Int = 0
-    protected var textureHeight: Int = 0
+    private var renderListener: IRender.RenderListener? = null
     protected var viewWidth: Int = 0
     protected var viewHeight: Int = 0
 
-    init {
-        mInputSurfaceTexture.detachFromGLContext()
-    }
-
     override fun setRenderListener(renderListener: IRender.RenderListener) {
-
+        this.renderListener = renderListener
     }
 
-    override fun getInputSurfaceTexture(): SurfaceTexture {
-        return mInputSurfaceTexture
-    }
-
-    @CallSuper
-    override fun setTextureSize(textureWidth: Int, textureHeight: Int) {
-        this.textureWidth = textureWidth
-        this.textureHeight = textureHeight
-    }
     @CallSuper
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         viewWidth = width
@@ -48,4 +31,9 @@ abstract class AbsRender : IRender {
         renderListener?.onRenderReady()
     }
 
+    @CallSuper
+    override fun onSurfaceDestory() {
+        viewWidth = 0
+        viewHeight = 0
+    }
 }
