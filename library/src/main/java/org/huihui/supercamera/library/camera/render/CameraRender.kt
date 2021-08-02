@@ -1,5 +1,6 @@
 package org.huihui.supercamera.library.camera.render
 
+import org.huihui.supercamera.library.camera.filter.DisplayFilter
 import org.huihui.supercamera.library.camera.filter.IFilter
 import org.huihui.supercamera.library.camera.filter.OESFilter
 import javax.microedition.khronos.egl.EGLConfig
@@ -13,9 +14,12 @@ import javax.microedition.khronos.opengles.GL10
  */
 class CameraRender : AbsRender() {
     private val oesFilter: IFilter
+    private val displayFilter: IFilter
 
     init {
         oesFilter = OESFilter()
+
+        displayFilter = DisplayFilter()
 
     }
 
