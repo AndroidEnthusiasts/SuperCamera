@@ -10,7 +10,7 @@ interface IFilter {
 
     fun onInit()
 
-    fun onDrawFrame(): Int
+    fun onDrawFrame(textureId: Int): Int
 
     fun onSizeChanged(width: Int, height: Int, textureWidth: Int, textureHeight: Int)
 

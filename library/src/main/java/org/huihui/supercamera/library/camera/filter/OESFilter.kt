@@ -8,7 +8,7 @@ package org.huihui.supercamera.library.camera.filter
  */
 class OESFilter : FBOBaseFilter() {
 
-    override fun onDrawFrame(): Int {
+    override fun onDrawFrame(textureId: Int): Int {
 
         return outputTexture[0]
     }

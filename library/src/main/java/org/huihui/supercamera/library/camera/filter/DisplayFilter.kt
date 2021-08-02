@@ -14,7 +14,7 @@ class DisplayFilter : BaseFilter() {
 
     }
 
-    override fun onDrawFrame(): Int {
+    override fun onDrawFrame(textureId: Int): Int {
         return GLES20.GL_NONE
     }
 }
