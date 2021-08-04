@@ -14,13 +14,13 @@ import javax.microedition.khronos.opengles.GL10
  * @author 陈松辉
  * @date 2021/7/28 21:55
  */
-class GLSurfacePreviewView : GLSurfaceView, IPreview, GLSurfaceView.Renderer, LifecycleEventObserver {
+class GLSurfacePreviewView(context: Context) : GLSurfaceView(context, null), IPreview, GLSurfaceView.Renderer, LifecycleEventObserver {
 
     private var render: IRender? = null
 
     private var destory = true
 
-    constructor(context: Context) : super(context, null) {
+    init {
         setRenderer(this)
     }
 
