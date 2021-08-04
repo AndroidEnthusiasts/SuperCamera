@@ -2,6 +2,7 @@ package org.huihui.supercamera.library.camera.preview
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import android.util.AttributeSet
 import androidx.lifecycle.*
 import org.huihui.supercamera.library.camera.render.IRender
 import javax.microedition.khronos.egl.EGLConfig
@@ -14,13 +15,14 @@ import javax.microedition.khronos.opengles.GL10
  * @author 陈松辉
  * @date 2021/7/28 21:55
  */
-class GLSurfacePreviewView(context: Context) : GLSurfaceView(context, null), IPreview, GLSurfaceView.Renderer, LifecycleEventObserver {
-
+class GLSurfacePreviewView : GLSurfaceView, IPreview, GLSurfaceView.Renderer, LifecycleEventObserver {
     private var render: IRender? = null
 
     private var destory = true
 
-    init {
+    constructor(context: Context) : this(context, null)
+
+    constructor(context: Context, attributeSet: AttributeSet?) : super(context, attributeSet) {
         setRenderer(this)
     }
 

@@ -8,8 +8,9 @@ import android.opengl.GLES20
  * @author 陈松辉
  * @date 2021/8/2 22:25
  */
-class OESFilter : BaseFilter() {
+class OESFilter : FBOBaseFilter() {
     override fun onInit() {
+        super.onInit()
 
 
     }

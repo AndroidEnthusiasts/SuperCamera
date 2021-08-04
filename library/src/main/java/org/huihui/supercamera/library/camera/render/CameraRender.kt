@@ -1,12 +1,17 @@
 package org.huihui.supercamera.library.camera.render
 
 import android.graphics.SurfaceTexture
+import android.opengl.GLES10
+import android.opengl.GLES10Ext
+import android.opengl.GLES11Ext
+import android.opengl.GLES20
 import androidx.annotation.CallSuper
 import org.huihui.supercamera.library.camera.filter.DisplayFilter
 import org.huihui.supercamera.library.camera.filter.IFilter
 import org.huihui.supercamera.library.camera.filter.OESFilter
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import javax.microedition.khronos.opengles.GL10Ext
 
 /*
  * @Description: 
@@ -17,12 +22,14 @@ import javax.microedition.khronos.opengles.GL10
 class CameraRender : AbsRender(), ICameraRender {
 
     private val mInputSurfaceTexture = SurfaceTexture(0)
+    private var oesTextureId = intArrayOf(GLES20.GL_NONE)
 
     protected var textureWidth: Int = 0
     protected var textureHeight: Int = 0
 
     private val oesFilter: IFilter
     private val displayFilter: IFilter
+
 
     init {
         mInputSurfaceTexture.detachFromGLContext()
@@ -44,6 +51,13 @@ class CameraRender : AbsRender(), ICameraRender {
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
         super.onSurfaceCreated(gl, config)
+        GLES20.glGenTextures(1, oesTextureId, 0)
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+        mInputSurfaceTexture.attachToGLContext(oesTextureId[0])
 
         oesFilter.onInit()
         displayFilter.onInit()
@@ -72,8 +86,9 @@ class CameraRender : AbsRender(), ICameraRender {
 
 
     override fun onDrawFrame(gl: GL10?) {
-//        oesFilter.onDrawFrame()
+        var curTextureId: Int = oesFilter.onDrawFrame(oesTextureId[0])
 
+        displayFilter.onDrawFrame(curTextureId)
     }
 
 }

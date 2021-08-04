@@ -16,6 +16,7 @@ abstract class FBOBaseFilter : BaseFilter() {
     @CallSuper
     override fun onInit() {
         GLES10.glGenTextures(1, outputTexture, 0)
+        
     }
 
     @CallSuper
