@@ -2,25 +2,25 @@ package org.huihui.supercamera
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_camera.*
-import kotlinx.android.synthetic.main.activity_main.*
-import org.huihui.supercamera.R
+import org.huihui.supercamera.databinding.ActivityCameraBinding
 
 class CameraActivity : AppCompatActivity() {
+    lateinit var binding: ActivityCameraBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
+        setContentView(binding.root)
     }
 
     override fun onResume() {
         super.onResume()
-        gls.onResume()
+        binding.gls.onResume()
     }
 
     // TODO BUG 待解决
     override fun onPause() {
         super.onPause()
-        gls.onPause()
+        binding.gls.onPause()
     }
 
 }
