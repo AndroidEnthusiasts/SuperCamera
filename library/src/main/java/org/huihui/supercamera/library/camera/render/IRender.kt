@@ -12,20 +12,18 @@ import javax.microedition.khronos.opengles.GL10
  */
 interface IRender {
 
-    fun setRenderListener(renderListener: RenderListener)
-
     fun onSurfaceCreated(gl: GL10?, config: EGLConfig?)
 
     fun onSurfaceChanged(gl: GL10?, width: Int, height: Int)
 
-    fun onSurfaceDestory()
-
     fun onDrawFrame(gl: GL10?)
 
-    interface RenderListener {
+    fun onSurfaceDestory()
 
-        fun onRenderReady()
+    /**
+     * glcontex 销毁
+     */
+    fun onDestroy()
 
-        fun onRenderDestory()
-    }
+    fun release()
 }

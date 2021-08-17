@@ -1,17 +1,17 @@
 package org.huihui.supercamera.library.camera.render
 
 import android.graphics.SurfaceTexture
-import android.opengl.GLES10
-import android.opengl.GLES10Ext
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
-import androidx.annotation.CallSuper
+import android.util.Log
 import org.huihui.supercamera.library.camera.filter.DisplayFilter
 import org.huihui.supercamera.library.camera.filter.IFilter
 import org.huihui.supercamera.library.camera.filter.OESFilter
+import org.huihui.supercamera.library.camera.filter.utils.OpenGLUtils
+import javax.microedition.khronos.egl.EGL10
 import javax.microedition.khronos.egl.EGLConfig
+import javax.microedition.khronos.egl.EGLContext
 import javax.microedition.khronos.opengles.GL10
-import javax.microedition.khronos.opengles.GL10Ext
 
 /*
  * @Description: 
@@ -20,20 +20,21 @@ import javax.microedition.khronos.opengles.GL10Ext
  * @date 2021/7/28 22:33
  */
 class CameraRender : AbsRender(), ICameraRender {
-
+    companion object{
+        const val TAG = "CameraRender"
+    }
     private val mInputSurfaceTexture = SurfaceTexture(0)
+//    private var mSurfaceTextureAttached = false
     private var oesTextureId = intArrayOf(GLES20.GL_NONE)
 
-    protected var textureWidth: Int = 0
-    protected var textureHeight: Int = 0
+    private var textureWidth: Int = 0
+    private var textureHeight: Int = 0
 
     private val oesFilter: IFilter
     private val displayFilter: IFilter
 
 
     init {
-        mInputSurfaceTexture.detachFromGLContext()
-
         oesFilter = OESFilter()
 
         displayFilter = DisplayFilter()
@@ -50,21 +51,31 @@ class CameraRender : AbsRender(), ICameraRender {
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        super.onSurfaceCreated(gl, config)
         GLES20.glGenTextures(1, oesTextureId, 0)
+
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
+
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST)
+
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+
+        mInputSurfaceTexture.detachFromGLContext()
+
         mInputSurfaceTexture.attachToGLContext(oesTextureId[0])
 
+//        mSurfaceTextureAttached = true
         oesFilter.onInit()
         displayFilter.onInit()
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         super.onSurfaceChanged(gl, width, height)
+        mInputSurfaceTexture.setDefaultBufferSize(width, height)
+
         notifySizeChange()
     }
 
@@ -77,15 +88,26 @@ class CameraRender : AbsRender(), ICameraRender {
 
     override fun onSurfaceDestory() {
         super.onSurfaceDestory()
-        mInputSurfaceTexture.detachFromGLContext()
+    }
+
+    override fun release() {
         textureHeight = 0
         textureWidth = 0
-        oesFilter.onDestroy()
-        displayFilter.onDestroy()
+
+    }
+
+    override fun onDestroy() {
+        //  detachFromContext: invalid current EGLDisplay 无法解决
+       // mInputSurfaceTexture.detachFromGLContext()
+        textureHeight = 0
+        textureWidth = 0
+//        oesFilter.release()
+//        displayFilter.release()
     }
 
 
     override fun onDrawFrame(gl: GL10?) {
+        mInputSurfaceTexture.updateTexImage()
         var curTextureId: Int = oesFilter.onDrawFrame(oesTextureId[0])
 
         displayFilter.onDrawFrame(curTextureId)

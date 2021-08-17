@@ -159,11 +159,13 @@ class Camera1 : AbsCamera(), Camera.PreviewCallback {
             val size = caculatePreviewSize(getPreviewWidth(), getPreviewHeight())
             setPreviewHeight(size.height)
             setPreviewWidth(size.width)
-            parameters.apply {
+            val params = parameters.apply {
                 setPreviewSize(size.width, size.height)
             }
+            parameters = params
             setPreviewTexture(surfaceTexture)
             setPreviewCallback(this@Camera1)
+            startPreview()
         }
     }
 

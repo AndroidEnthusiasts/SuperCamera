@@ -12,23 +12,13 @@ import javax.microedition.khronos.opengles.GL10
  * @date 2021/7/23 9:40
  */
 abstract class AbsRender : IRender {
-    private var renderListener: IRender.RenderListener? = null
     protected var viewWidth: Int = 0
     protected var viewHeight: Int = 0
-
-    override fun setRenderListener(renderListener: IRender.RenderListener) {
-        this.renderListener = renderListener
-    }
 
     @CallSuper
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         viewWidth = width
         viewHeight = height
-    }
-
-    @CallSuper
-    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        renderListener?.onRenderReady()
     }
 
     @CallSuper

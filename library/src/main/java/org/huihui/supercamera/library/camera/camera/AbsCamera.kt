@@ -22,9 +22,9 @@ abstract class AbsCamera : ICamera {
 //        }
 //    }
 
-    private var previewWidth = 720
+    private var previewWidth = 1280
 
-    private var previewHeight = 1280
+    private var previewHeight = 720
 
     private var isFont = false
 

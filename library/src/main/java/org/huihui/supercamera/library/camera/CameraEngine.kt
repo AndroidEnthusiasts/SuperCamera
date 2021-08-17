@@ -1,12 +1,12 @@
 package org.huihui.supercamera.library.camera
 
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import org.huihui.supercamera.library.camera.camera.Camera1
 import org.huihui.supercamera.library.camera.camera.ICamera
 import org.huihui.supercamera.library.camera.preview.IPreview
 import org.huihui.supercamera.library.camera.render.CameraRender
 import org.huihui.supercamera.library.camera.render.ICameraRender
-import org.huihui.supercamera.library.camera.render.IRender
 
 /*
  * @Description: 
@@ -19,26 +19,46 @@ class CameraEngine(
     render: ICameraRender = CameraRender(),
     preview: IPreview,
     lifecycleOwner: LifecycleOwner
-) : IRender.RenderListener {
-    private var mCamera = camera
+) : IPreview.PreviewListener {
 
-    private var IRender = render
+    companion object {
+        const val TAG = "CameraEngine"
+    }
 
-    private var IPreview = preview
+    private var mCamera: ICamera = camera
 
-    private var canPreview = false
+    private var mRender: ICameraRender = render
+
+    private var mPreview: IPreview = preview
+
+    private var previewReady = false
     private var isPreview = false
 
+    /**
+     * 自动开启预览
+     */
+    var autoPreView = true
+
+    private var pendingPreview = false
+
     init {
-        IPreview.bindLifeCycle(lifecycleOwner)
-        IRender.setRenderListener(this@CameraEngine)
-        preview.setRender(IRender)
+        mPreview.bindLifeCycle(lifecycleOwner)
+        mPreview.previewListner = this
+        mPreview.setRender(this.mRender)
+        this.mRender.getInputSurfaceTexture().setOnFrameAvailableListener {
+            mPreview.requestRender()
+        }
     }
 
     fun startPreview() {
-        if (canPreview && !isPreview) {
-            mCamera.startPreview(IRender.getInputSurfaceTexture())
-            IRender.setTextureSize(mCamera.getPreviewWidth(), mCamera.getPreviewHeight())
+        if (!previewReady) {
+            pendingPreview = true
+            return
+        }
+        if (!isPreview) {
+            mCamera.openCamera()
+            mCamera.startPreview(mRender.getInputSurfaceTexture())
+            mRender.setTextureSize(mCamera.getPreviewWidth(), mCamera.getPreviewHeight())
             isPreview = true
         }
     }
@@ -46,6 +66,7 @@ class CameraEngine(
     fun stopPreview() {
         if (isPreview) {
             mCamera.stopPreview()
+            isPreview= false
         }
     }
 
@@ -57,14 +78,16 @@ class CameraEngine(
 
     }
 
-    override fun onRenderReady() {
-        canPreview = true
-        startPreview()
+    override fun onPreviewReady() {
+        if (autoPreView || pendingPreview) {
+            previewReady = true
+            pendingPreview = false
+            startPreview()
+        }
     }
 
-
-    override fun onRenderDestory() {
-        canPreview = false
+    override fun onPreviewDestroy() {
+        previewReady = false
         stopPreview()
     }
 

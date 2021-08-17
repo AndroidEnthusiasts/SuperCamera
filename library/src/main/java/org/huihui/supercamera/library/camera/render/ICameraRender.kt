@@ -12,4 +12,5 @@ interface ICameraRender : IRender {
     fun getInputSurfaceTexture(): SurfaceTexture
 
     fun setTextureSize(textureWidth: Int, textureHeight: Int)
+
 }
