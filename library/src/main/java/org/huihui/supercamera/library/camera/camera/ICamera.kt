@@ -30,6 +30,7 @@ interface ICamera {
 
     fun takePicture()
 
+    fun getDisplayOrientation(): Int
 //    fun getOutputSurfaceTexture(): SurfaceTexture
 
     interface FrameListener {

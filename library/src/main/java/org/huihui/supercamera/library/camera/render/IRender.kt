@@ -26,4 +26,16 @@ interface IRender {
     fun onDestroy()
 
     fun release()
+
+
+    var renderListener: RenderListener?
+
+    interface RenderListener {
+
+        fun onSurfaceCreated()
+
+        fun onSurfaceDestroy()
+
+        fun onDestroy()
+    }
 }

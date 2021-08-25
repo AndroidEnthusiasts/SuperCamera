@@ -3,6 +3,7 @@ package org.huihui.supercamera.library.camera.filter
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
 import android.opengl.GLES30
+import android.opengl.Matrix
 import org.huihui.supercamera.library.camera.filter.utils.OpenGLUtils
 import org.huihui.supercamera.library.util.loadAssertString
 import java.nio.FloatBuffer
@@ -20,7 +21,8 @@ class OESFilter
 ) {
     private lateinit var vertexPos: FloatBuffer
     private lateinit var textureCoord: FloatBuffer
-
+    var oesMatrixArray = FloatArray(16)
+        private set
     private var vPosLocation = -1
     private var vTexCoord = -1
 
@@ -37,9 +39,11 @@ class OESFilter
 
         vPosLocation = 0
         vTexCoord = 1
-        GLES30.glGenVertexArrays(1, vao, 0)
 
+        GLES30.glGenVertexArrays(1, vao, 0)
         GLES30.glGenBuffers(2, vbo, 0)
+
+        Matrix.setIdentityM(oesMatrixArray, 0)
 
 
     }
@@ -86,6 +90,7 @@ class OESFilter
     }
 
     override fun onDraw() {
+        GLES20.glUniformMatrix4fv(5, 1, false, oesMatrixArray, 0)
         GLES30.glBindVertexArray(vao[0])
         OpenGLUtils.checkGlError("")
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)

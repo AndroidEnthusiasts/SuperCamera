@@ -51,6 +51,7 @@ class DisplayFilter : BaseFilter(
         super.onSizeChanged(width, height, textureWidth, textureHeight)
         vertexPos = OpenGLUtils.createFloatBuffer(VERTEX_POS)
         textureCoord = OpenGLUtils.createFloatBuffer(TEXTURE_COORD)
+
         GLES30.glBindVertexArray(vao[0])
 
         GLES30.glBindBuffer(GLES30.GL_ARRAY_BUFFER, vbo[0])
@@ -85,7 +86,7 @@ class DisplayFilter : BaseFilter(
         GLES20.glUseProgram(programId)
         GLES20.glViewport(0, 0, textureWidth, textureHeight)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
+        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
@@ -99,7 +100,6 @@ class DisplayFilter : BaseFilter(
         GLES20.glUseProgram(0)
         return GLES20.GL_NONE
     }
-
     override fun release() {
         super.release()
         GLES30.glDeleteBuffers(2, vbo, 0)

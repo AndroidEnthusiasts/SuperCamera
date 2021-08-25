@@ -1,12 +1,17 @@
 package org.huihui.supercamera.library.camera
 
+import android.app.Activity
+import android.content.Context
 import android.util.Log
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import org.huihui.supercamera.library.camera.camera.Camera1
 import org.huihui.supercamera.library.camera.camera.ICamera
 import org.huihui.supercamera.library.camera.preview.IPreview
 import org.huihui.supercamera.library.camera.render.CameraRender
 import org.huihui.supercamera.library.camera.render.ICameraRender
+import org.huihui.supercamera.library.camera.render.IRender
 
 /*
  * @Description: 
@@ -15,11 +20,12 @@ import org.huihui.supercamera.library.camera.render.ICameraRender
  * @date 2021/7/23 9:39
  */
 class CameraEngine(
-    camera: ICamera = Camera1(),
+    context: Context,
+    camera: ICamera = Camera1(context),
     render: ICameraRender = CameraRender(),
     preview: IPreview,
     lifecycleOwner: LifecycleOwner
-) : IPreview.PreviewListener {
+) : IRender.RenderListener, LifecycleEventObserver {
 
     companion object {
         const val TAG = "CameraEngine"
@@ -31,7 +37,6 @@ class CameraEngine(
 
     private var mPreview: IPreview = preview
 
-    private var previewReady = false
     private var isPreview = false
 
     /**
@@ -39,26 +44,25 @@ class CameraEngine(
      */
     var autoPreView = true
 
-    private var pendingPreview = false
-
     init {
         mPreview.bindLifeCycle(lifecycleOwner)
-        mPreview.previewListner = this
         mPreview.setRender(this.mRender)
+        mRender.renderListener = this
         this.mRender.getInputSurfaceTexture().setOnFrameAvailableListener {
             mPreview.requestRender()
         }
+        lifecycleOwner.lifecycle.addObserver(this)
     }
 
     fun startPreview() {
-        if (!previewReady) {
-            pendingPreview = true
-            return
-        }
         if (!isPreview) {
             mCamera.openCamera()
             mCamera.startPreview(mRender.getInputSurfaceTexture())
-            mRender.setTextureSize(mCamera.getPreviewWidth(), mCamera.getPreviewHeight())
+            if (mCamera.getDisplayOrientation() == 90 || mCamera.getDisplayOrientation() == 180) {
+                mRender.setTextureSize(mCamera.getPreviewHeight(), mCamera.getPreviewWidth())
+            } else {
+                mRender.setTextureSize(mCamera.getPreviewWidth(), mCamera.getPreviewHeight())
+            }
             isPreview = true
         }
     }
@@ -66,7 +70,7 @@ class CameraEngine(
     fun stopPreview() {
         if (isPreview) {
             mCamera.stopPreview()
-            isPreview= false
+            isPreview = false
         }
     }
 
@@ -78,17 +82,23 @@ class CameraEngine(
 
     }
 
-    override fun onPreviewReady() {
-        if (autoPreView || pendingPreview) {
-            previewReady = true
-            pendingPreview = false
-            startPreview()
-        }
+    override fun onSurfaceCreated() {
     }
 
-    override fun onPreviewDestroy() {
-        previewReady = false
-        stopPreview()
+    override fun onSurfaceDestroy() {
+
+    }
+
+    override fun onDestroy() {
+
+    }
+
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        if (event == Lifecycle.Event.ON_RESUME) {
+            startPreview()
+        } else if (event == Lifecycle.Event.ON_PAUSE) {
+            stopPreview()
+        }
     }
 
 //    class Builder {

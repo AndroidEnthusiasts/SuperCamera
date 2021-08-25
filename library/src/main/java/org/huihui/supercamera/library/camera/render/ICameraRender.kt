@@ -9,6 +9,8 @@ import android.graphics.SurfaceTexture
  * @date 2021/8/3 0:01
  */
 interface ICameraRender : IRender {
+
+
     fun getInputSurfaceTexture(): SurfaceTexture
 
     fun setTextureSize(textureWidth: Int, textureHeight: Int)

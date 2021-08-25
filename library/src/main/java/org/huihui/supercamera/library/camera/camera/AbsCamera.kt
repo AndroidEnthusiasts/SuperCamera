@@ -1,5 +1,6 @@
 package org.huihui.supercamera.library.camera.camera
 
+import android.content.Context
 import android.graphics.SurfaceTexture
 
 /*
@@ -8,7 +9,7 @@ import android.graphics.SurfaceTexture
  * @author 陈松辉
  * @date 2021/7/23 9:55
  */
-abstract class AbsCamera : ICamera {
+abstract class AbsCamera(var context: Context) : ICamera {
 //    private val surfaceTexture by lazy {
 //        SurfaceTexture(0).apply {
 //            initSurfaceTexture(this)
@@ -27,10 +28,17 @@ abstract class AbsCamera : ICamera {
     private var previewHeight = 720
 
     private var isFont = false
-
     var frameListener: ICamera.FrameListener? = null
+    private var displayOrientation = 0
 
-//    var textureFrameListener: ICamera.TextureFrameListener? = null
+    override fun getDisplayOrientation(): Int {
+        return displayOrientation
+    }
+
+    protected fun setDisplayOrientation(orientaion: Int) {
+        displayOrientation = orientaion
+    }
+//   var textureFrameListener: ICamera.TextureFrameListener? = null
 
 
     override fun isFont(): Boolean {

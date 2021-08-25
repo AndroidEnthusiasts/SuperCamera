@@ -8,7 +8,9 @@ layout(location=1) uniform mat4 view;
 layout(location=2) uniform mat4 projection;
 layout(location=3) uniform mat4 mvp;
 
+layout(location=5) uniform mat4 coordMatrix;
+
 void main(){
     gl_Position = mvp * vec4(vPos, 1.0f);
-    fTexCoord = vTexCoord;
+    fTexCoord = (coordMatrix* vec4(vTexCoord, 0.0f, 1.0f)).xy;
 }

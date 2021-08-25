@@ -1,7 +1,12 @@
 package org.huihui.supercamera.library.camera.camera
 
+import android.app.Activity
+import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
+import android.hardware.Camera.CameraInfo
+import android.view.Surface
+import android.view.WindowManager
 import java.util.*
 import kotlin.math.abs
 
@@ -12,7 +17,7 @@ import kotlin.math.abs
  * @author 陈松辉
  * @date 2021/7/22 17:32
  */
-class Camera1 : AbsCamera(), Camera.PreviewCallback {
+class Camera1(context: Context) : AbsCamera(context), Camera.PreviewCallback {
 
     private var mCameraId = -1
 
@@ -20,7 +25,7 @@ class Camera1 : AbsCamera(), Camera.PreviewCallback {
 
     //    surfaceTexture: SurfaceTexture
     init {
-        mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT
+        mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK
     }
 
     override fun openCamera() {
@@ -163,16 +168,40 @@ class Camera1 : AbsCamera(), Camera.PreviewCallback {
                 setPreviewSize(size.width, size.height)
             }
             parameters = params
+            super.setDisplayOrientation(calculateCameraPreviewOrientation())
+            setDisplayOrientation(getDisplayOrientation())
             setPreviewTexture(surfaceTexture)
             setPreviewCallback(this@Camera1)
             startPreview()
         }
     }
 
+    private fun calculateCameraPreviewOrientation(): Int {
+        val info = CameraInfo()
+        Camera.getCameraInfo(mCameraId, info)
+        val rotation = (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager)
+            .defaultDisplay.rotation
+        var degrees = 0
+        when (rotation) {
+            Surface.ROTATION_0 -> degrees = 0
+            Surface.ROTATION_90 -> degrees = 90
+            Surface.ROTATION_180 -> degrees = 180
+            Surface.ROTATION_270 -> degrees = 270
+        }
+        var result: Int
+        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+            result = (info.orientation + degrees) % 360
+            result = (360 - result) % 360
+        } else {
+            result = (info.orientation - degrees + 360) % 360
+        }
+        return result
+    }
+
     override fun stopPreview() {
         mCamera?.apply {
             stopPreview()
-            setPreviewTexture(null)
+//            setPreviewTexture(null)
             setPreviewCallback(null)
         }
     }

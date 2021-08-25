@@ -11,7 +11,8 @@ import javax.microedition.khronos.opengles.GL10
  * @author 陈松辉
  * @date 2021/7/23 9:40
  */
-abstract class AbsRender : IRender {
+abstract class AbsRender : Thread(), IRender {
+
     protected var viewWidth: Int = 0
     protected var viewHeight: Int = 0
 
@@ -25,5 +26,9 @@ abstract class AbsRender : IRender {
     override fun onSurfaceDestory() {
         viewWidth = 0
         viewHeight = 0
+    }
+
+    override fun run() {
+
     }
 }

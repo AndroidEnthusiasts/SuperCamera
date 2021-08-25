@@ -99,6 +99,8 @@ class GLSurfacePreviewView : GLSurfaceView, IPreview, GLSurfaceView.Renderer, Li
     override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
         if (event == Lifecycle.Event.ON_PAUSE) {
             onPause()
+        } else if (event == Lifecycle.Event.ON_RESUME) {
+            onResume()
         }
     }
 

@@ -11,19 +11,18 @@ import org.huihui.supercamera.util.permissions.PermissionResult
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
-    lateinit var engine: CameraEngine
+    var engine: CameraEngine? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.start.setOnClickListener {
-            engine.startPreview()
+            engine?.startPreview()
         }
         binding.stop.setOnClickListener {
-            engine.stopPreview()
+            engine?.stopPreview()
         }
-//        requestPermissions()
-        engine = CameraEngine(preview = binding.gls, lifecycleOwner = this)
+        requestPermissions()
     }
 
     private fun requestPermissions() {
@@ -36,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             when (it) {
                 is PermissionResult.Grant -> {
                     // 权限允许
-
+                    engine = CameraEngine(applicationContext, preview = binding.gls, lifecycleOwner = this)
                     println("权限获取成功")
                 }
                 is PermissionResult.Rationale -> {
