@@ -26,7 +26,6 @@ class CameraRender : AbsRender(), ICameraRender {
 
     private val mInputSurfaceTexture = SurfaceTexture(0)
 
-    //    private var mSurfaceTextureAttached = false
     private var oesTextureId = intArrayOf(GLES20.GL_NONE)
 
     private var textureWidth: Int = 0
@@ -37,6 +36,9 @@ class CameraRender : AbsRender(), ICameraRender {
 
 
     init {
+        mInputSurfaceTexture.setOnFrameAvailableListener {
+            requestRender()
+        }
         oesFilter = OESFilter()
 
         displayFilter = DisplayFilter()
@@ -54,42 +56,44 @@ class CameraRender : AbsRender(), ICameraRender {
         notifySizeChange()
     }
 
-    override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        GLES20.glGenTextures(1, oesTextureId, 0)
-
-        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
-
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST)
-
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
-
-        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
-        mInputSurfaceTexture.detachFromGLContext()
-        mInputSurfaceTexture.attachToGLContext(oesTextureId[0])
-//        mSurfaceTextureAttached = true
+    override fun onGLCreated() {
         oesFilter.onInit()
         displayFilter.onInit()
         renderListener?.onSurfaceCreated()
+        OpenGLUtils.checkGlError("")
+
+    }
+    override fun onSurfaceCreated() {
+        GLES20.glGenTextures(1, oesTextureId, 0)
+        GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE)
+        GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE)
+        // 这里会销毁原来的texture
+        mInputSurfaceTexture.detachFromGLContext()
+        mInputSurfaceTexture.attachToGLContext(oesTextureId[0])
+        OpenGLUtils.checkGlError("")
     }
 
-    override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        super.onSurfaceChanged(gl, width, height)
-        mInputSurfaceTexture.setDefaultBufferSize(width, height)
-
+    override fun onSurfaceChanged(width: Int, height: Int) {
         notifySizeChange()
+        mInputSurfaceTexture.setDefaultBufferSize(textureWidth, textureHeight)
+
     }
 
     private fun notifySizeChange() {
         if (viewWidth != 0 && viewHeight != 0 && textureWidth != 0 && textureHeight != 0) {
-            oesFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
-            displayFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
+            enqueueTask {
+                oesFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
+                displayFilter.onSizeChanged(viewWidth, viewHeight, textureWidth, textureHeight)
+                OpenGLUtils.checkGlError("")
+            }
+
         }
     }
 
     override fun onSurfaceDestory() {
-        super.onSurfaceDestory()
         renderListener?.onSurfaceDestroy()
     }
 
@@ -100,7 +104,7 @@ class CameraRender : AbsRender(), ICameraRender {
         displayFilter.release()
     }
 
-    override fun onDestroy() {
+    override fun onGLDestroy() {
         //  detachFromContext: invalid current EGLDisplay 无法解决
 //        mInputSurfaceTexture.detachFromGLContext()
         textureHeight = 0
@@ -109,8 +113,7 @@ class CameraRender : AbsRender(), ICameraRender {
 
     }
 
-
-    override fun onDrawFrame(gl: GL10?) {
+    override fun onDrawFrame() {
         mInputSurfaceTexture.updateTexImage()
         (oesFilter as OESFilter).apply {
             mInputSurfaceTexture.getTransformMatrix(oesMatrixArray)
@@ -119,5 +122,6 @@ class CameraRender : AbsRender(), ICameraRender {
 
         displayFilter.onDrawFrame(curTextureId)
     }
+
 
 }

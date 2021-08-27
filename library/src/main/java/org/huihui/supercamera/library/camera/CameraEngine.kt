@@ -45,12 +45,11 @@ class CameraEngine(
     var autoPreView = true
 
     init {
+        mRender.renderListener = this
+        mRender.initRender()
+
         mPreview.bindLifeCycle(lifecycleOwner)
         mPreview.setRender(this.mRender)
-        mRender.renderListener = this
-        this.mRender.getInputSurfaceTexture().setOnFrameAvailableListener {
-            mPreview.requestRender()
-        }
         lifecycleOwner.lifecycle.addObserver(this)
     }
 

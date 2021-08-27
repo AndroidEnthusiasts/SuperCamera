@@ -1,6 +1,7 @@
 package org.huihui.supercamera.library.camera.render
 
 import android.graphics.SurfaceTexture
+import android.view.Surface
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
@@ -11,19 +12,36 @@ import javax.microedition.khronos.opengles.GL10
  * @date 2021/7/23 9:40
  */
 interface IRender {
+    fun initRender()
 
-    fun onSurfaceCreated(gl: GL10?, config: EGLConfig?)
+    fun surfaceCreated(surface: Surface)
 
-    fun onSurfaceChanged(gl: GL10?, width: Int, height: Int)
+    fun surfaceCreated(surfaceTexture: SurfaceTexture)
 
-    fun onDrawFrame(gl: GL10?)
+    fun surfaceChange(width: Int, height: Int)
+
+    fun surfaceDestroy()
+
+    fun requestRender()
+
+    fun enqueueTask(runnable: Runnable)
+
+    fun onGLCreated()
+
+    fun onSurfaceCreated()
+
+    fun onSurfaceChanged(width: Int, height: Int)
+
+    fun onDrawFrame()
+
+    fun beforeSurfaceDestory()
 
     fun onSurfaceDestory()
 
     /**
      * glcontex 销毁
      */
-    fun onDestroy()
+    fun onGLDestroy()
 
     fun release()
 

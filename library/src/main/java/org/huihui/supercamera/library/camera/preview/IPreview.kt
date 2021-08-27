@@ -11,20 +11,7 @@ import org.huihui.supercamera.library.camera.render.IRender
  */
 interface IPreview {
 
-    var previewListner: PreviewListener?
-
     fun setRender(render: IRender)
 
     fun bindLifeCycle(lifecycleOwner: LifecycleOwner)
-
-    fun requestRender()
-
-    interface PreviewListener {
-
-        fun onPreviewReady()
-
-        fun onPreviewDestroy()
-
-    }
-
 }

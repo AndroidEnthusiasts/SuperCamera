@@ -86,17 +86,11 @@ class DisplayFilter : BaseFilter(
         GLES20.glUseProgram(programId)
         GLES20.glViewport(0, 0, textureWidth, textureHeight)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-        
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
-
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
-
         GLES20.glUniform1i(inputTextureLocation, 0)
-
         GLES30.glBindVertexArray(vao[0])
-
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
-
         GLES20.glUseProgram(0)
         return GLES20.GL_NONE
     }
