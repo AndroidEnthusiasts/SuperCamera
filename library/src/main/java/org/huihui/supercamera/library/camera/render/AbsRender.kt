@@ -26,6 +26,7 @@ abstract class AbsRender : IRender {
         const val MSG_RENDER = 0x04
     }
 
+    protected var autoRender = false
     protected var viewWidth: Int = 0
     protected var viewHeight: Int = 0
     protected var eglCore: EglCore? = null
@@ -44,6 +45,10 @@ abstract class AbsRender : IRender {
             start()
             renderHander = RenderHandler(looper)
         }
+    }
+
+    override fun setRenderMode(auto: Boolean) {
+        autoRender = auto
     }
 
     override fun surfaceCreated(surface: Surface) {
@@ -72,7 +77,7 @@ abstract class AbsRender : IRender {
 
     override fun requestRender() {
         renderHander?.apply {
-            if (haveSurface) {
+            if (renderReady()) {
                 sendMessage(Message.obtain(this, MSG_RENDER))
             }
         }
@@ -143,6 +148,7 @@ abstract class AbsRender : IRender {
                         viewWidth = msg.arg1
                         viewHeight = msg.arg2
                         onSurfaceChanged(viewWidth, viewHeight)
+                        requestRender()
                     }
                     MSG_SURFACE_DESTROY -> {
                         beforeSurfaceDestory()
@@ -155,15 +161,22 @@ abstract class AbsRender : IRender {
                         onSurfaceDestory()
                     }
                     MSG_RENDER -> {
-                        if (haveSurface) {
+                        if (renderReady()) {
                             onDrawFrame()
                             swapBuffers(eglSurface)
+                            if (autoRender) {
+                                requestRender()
+                            }
                         }
                     }
                 }
             }
 
         }
+    }
+
+    fun renderReady(): Boolean {
+        return viewHeight > 0 && viewWidth > 0 && haveSurface
     }
 
     inner class GLThread : HandlerThread("GLThread") {

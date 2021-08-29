@@ -27,6 +27,7 @@ class GlRenderActivity : AppCompatActivity() {
             )
 
             override fun onGLCreated() {
+                autoRender = true
                 programId = OpenGLUtils.createProgram(
                     loadAssertString("triangle.vs"),
                     loadAssertString("triangle.fs")
@@ -42,9 +43,10 @@ class GlRenderActivity : AppCompatActivity() {
                 )
                 GLES30.glVertexAttribPointer(
                     0, 3, GLES30.GL_FLOAT, false,
-                    0, null
+                    0, 0
                 )
                 GLES30.glEnableVertexAttribArray(0)
+                OpenGLUtils.checkGlError("")
             }
 
             override fun onSurfaceCreated() {
@@ -57,6 +59,7 @@ class GlRenderActivity : AppCompatActivity() {
                 GLES20.glUseProgram(programId)
                 GLES30.glBindVertexArray(vao[0])
                 GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3)
+                OpenGLUtils.checkGlError("")
             }
 
             override fun surfaceDestroy() {

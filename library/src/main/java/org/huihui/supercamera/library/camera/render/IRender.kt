@@ -14,6 +14,8 @@ import javax.microedition.khronos.opengles.GL10
 interface IRender {
     fun initRender()
 
+    fun setRenderMode(auto: Boolean)
+
     fun surfaceCreated(surface: Surface)
 
     fun surfaceCreated(surfaceTexture: SurfaceTexture)

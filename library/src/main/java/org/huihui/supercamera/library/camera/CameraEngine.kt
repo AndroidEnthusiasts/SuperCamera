@@ -46,8 +46,6 @@ class CameraEngine(
 
     init {
         mRender.renderListener = this
-        mRender.initRender()
-
         mPreview.bindLifeCycle(lifecycleOwner)
         mPreview.setRender(this.mRender)
         lifecycleOwner.lifecycle.addObserver(this)

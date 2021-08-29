@@ -32,6 +32,7 @@ class SurfaceRenderView : SurfaceView, IPreview, LifecycleEventObserver, Surface
 
     override fun setRender(render: IRender) {
         this.render = render
+        render.initRender()
     }
 
     override fun bindLifeCycle(lifecycleOwner: LifecycleOwner) {
