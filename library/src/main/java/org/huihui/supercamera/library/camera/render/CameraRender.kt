@@ -3,15 +3,10 @@ package org.huihui.supercamera.library.camera.render
 import android.graphics.SurfaceTexture
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
-import android.util.Log
 import org.huihui.supercamera.library.camera.filter.DisplayFilter
 import org.huihui.supercamera.library.camera.filter.IFilter
 import org.huihui.supercamera.library.camera.filter.OESFilter
 import org.huihui.supercamera.library.camera.filter.utils.OpenGLUtils
-import javax.microedition.khronos.egl.EGL10
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.egl.EGLContext
-import javax.microedition.khronos.opengles.GL10
 
 /*
  * @Description: 
@@ -44,7 +39,7 @@ class CameraRender : AbsRender(), ICameraRender {
         displayFilter = DisplayFilter()
     }
 
-    override var renderListener: IRender.RenderListener? = null
+    override var renderListener: IRender.IRenderListener? = null
 
     override fun getInputSurfaceTexture(): SurfaceTexture {
         return mInputSurfaceTexture
@@ -53,7 +48,12 @@ class CameraRender : AbsRender(), ICameraRender {
     override fun setTextureSize(textureWidth: Int, textureHeight: Int) {
         this.textureWidth = textureWidth
         this.textureHeight = textureHeight
+        mInputSurfaceTexture.setDefaultBufferSize(textureWidth, textureHeight)
         notifySizeChange()
+    }
+
+    override fun renderReady(): Boolean {
+        return super.renderReady() && textureWidth > 0 && textureHeight > 0
     }
 
     override fun onGLCreated() {
@@ -63,6 +63,7 @@ class CameraRender : AbsRender(), ICameraRender {
         OpenGLUtils.checkGlError("")
 
     }
+
     override fun onSurfaceCreated() {
         GLES20.glGenTextures(1, oesTextureId, 0)
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
@@ -78,8 +79,7 @@ class CameraRender : AbsRender(), ICameraRender {
 
     override fun onSurfaceChanged(width: Int, height: Int) {
         notifySizeChange()
-        mInputSurfaceTexture.setDefaultBufferSize(textureWidth, textureHeight)
-
+        renderListener?.onSurfaceChanged(width, height)
     }
 
     private fun notifySizeChange() {
@@ -93,8 +93,23 @@ class CameraRender : AbsRender(), ICameraRender {
         }
     }
 
+
+    override fun onDrawFrame() {
+        mInputSurfaceTexture.updateTexImage()
+        (oesFilter as OESFilter).apply {
+            mInputSurfaceTexture.getTransformMatrix(oesMatrixArray)
+        }
+        var curTextureId: Int = oesFilter.onDrawFrame(oesTextureId[0])
+        renderListener?.onDrawFrame(curTextureId)
+        displayFilter.onDrawFrame(curTextureId)
+    }
+
+    override fun beforeSurfaceDestory() {
+        renderListener?.beforeSurfaceDestory()
+    }
+
     override fun onSurfaceDestory() {
-        renderListener?.onSurfaceDestroy()
+        renderListener?.onSurfaceDestory()
     }
 
     override fun release() {
@@ -109,18 +124,8 @@ class CameraRender : AbsRender(), ICameraRender {
 //        mInputSurfaceTexture.detachFromGLContext()
         textureHeight = 0
         textureWidth = 0
-        renderListener?.onDestroy()
+        renderListener?.onGLDestroy()
 
-    }
-
-    override fun onDrawFrame() {
-        mInputSurfaceTexture.updateTexImage()
-        (oesFilter as OESFilter).apply {
-            mInputSurfaceTexture.getTransformMatrix(oesMatrixArray)
-        }
-        var curTextureId: Int = oesFilter.onDrawFrame(oesTextureId[0])
-
-        displayFilter.onDrawFrame(curTextureId)
     }
 
 

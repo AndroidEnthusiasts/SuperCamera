@@ -53,6 +53,10 @@ class GlRenderActivity : AppCompatActivity() {
 
             }
 
+            override fun onSurfaceChanged(width: Int, height: Int) {
+
+            }
+
             override fun onDrawFrame() {
                 GLES20.glViewport(0, 0, viewWidth, viewHeight)
                 GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
@@ -62,15 +66,19 @@ class GlRenderActivity : AppCompatActivity() {
                 OpenGLUtils.checkGlError("")
             }
 
-            override fun surfaceDestroy() {
+            override fun beforeSurfaceDestory() {
+                TODO("Not yet implemented")
+            }
 
+            override fun onSurfaceDestory() {
+                TODO("Not yet implemented")
             }
 
             override fun onGLDestroy() {
 
             }
 
-            override var renderListener: IRender.RenderListener? = null
+            override var renderListener: IRender.IRenderListener? = null
         })
     }
 }

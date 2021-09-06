@@ -3,11 +3,17 @@ package org.huihui.supercamera
 import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import androidx.lifecycle.Observer
 import org.huihui.supercamera.databinding.ActivityMainBinding
 import org.huihui.supercamera.library.camera.CameraEngine
+import org.huihui.supercamera.library.camera.record.AudioRecorder
+import org.huihui.supercamera.library.camera.record.CameraRecoder
 import org.huihui.supercamera.util.permissions.PermissionCheckUtil
 import org.huihui.supercamera.util.permissions.PermissionResult
+import java.io.File
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -21,6 +27,20 @@ class MainActivity : AppCompatActivity() {
         }
         binding.stop.setOnClickListener {
             engine?.stopPreview()
+        }
+        val file = File(
+            Environment.getExternalStorageDirectory().absolutePath,
+            "/superCamera"
+        )
+        file.mkdirs()
+
+
+        binding.record.setOnClickListener {
+            val path = File(file, "/test_${System.currentTimeMillis()}.mp4").absolutePath
+            engine?.startRecord(path)
+        }
+        binding.stoprecord.setOnClickListener {
+            engine?.stopRecord()
         }
         requestPermissions()
     }

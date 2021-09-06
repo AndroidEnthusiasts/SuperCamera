@@ -2,14 +2,18 @@ package org.huihui.supercamera.library.camera.render
 
 import android.graphics.SurfaceTexture
 import android.opengl.EGL14
+import android.opengl.EGLContext
 import android.opengl.EGLSurface
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.view.Surface
+import androidx.annotation.CallSuper
 import org.huihui.supercamera.library.camera.egl.EglCore
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 
 /*
  * @Description: 
@@ -19,6 +23,8 @@ import java.util.*
  */
 abstract class AbsRender : IRender {
     companion object {
+        const val TAG = "AbsRender"
+
         const val MSG_TASK = 0x00
         const val MSG_SURFACE_CREATE = 0x01
         const val MSG_SURFACE_CHANGE = 0x02
@@ -32,6 +38,8 @@ abstract class AbsRender : IRender {
     protected var eglCore: EglCore? = null
     protected var eglSurface: EGLSurface? = null
     private var taskQueue = LinkedList<Runnable>()
+    private var renderLock = ReentrantLock()
+    private var renderCondition = renderLock.newCondition()
 
     @Volatile
     protected var thread: GLThread? = null
@@ -51,28 +59,47 @@ abstract class AbsRender : IRender {
         autoRender = auto
     }
 
+    override fun getEGLContex(): EGLContext? {
+        return eglCore?.eglContext
+    }
+
     override fun surfaceCreated(surface: Surface) {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CREATE, surface))
         }
     }
 
+    @CallSuper
     override fun surfaceChange(width: Int, height: Int) {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CHANGE, width, height))
         }
     }
 
+    @CallSuper
     override fun surfaceCreated(surfaceTexture: SurfaceTexture) {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CREATE, surfaceTexture))
         }
+        renderLock.lock()
+        while (!haveSurface) {
+            renderCondition.await()
+        }
+        renderLock.unlock()
     }
 
+    @CallSuper
     override fun surfaceDestroy() {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_DESTROY))
         }
+        //这里需要等待glsurface销毁 不然会有gl错误
+        renderLock.lock()
+        while (haveSurface) {
+            renderCondition.await()
+        }
+        renderLock.unlock()
+
     }
 
     override fun requestRender() {
@@ -82,21 +109,30 @@ abstract class AbsRender : IRender {
             }
         }
     }
-
-    override fun onGLCreated() {
-
-    }
-
-    override fun onSurfaceChanged(width: Int, height: Int) {
-
-    }
-
-    override fun onSurfaceDestory() {
-
-    }
-
-    override fun beforeSurfaceDestory() {
-    }
+//    @CallSuper
+//    override fun onGLCreated() {
+//        renderListener?.onGLCreated()
+//    }
+//    @CallSuper
+//    override fun onSurfaceChanged(width: Int, height: Int) {
+//        renderListener?.onSurfaceChanged(width,height)
+//    }
+//    @CallSuper
+//    override fun onSurfaceDestory() {
+//        renderListener?.onSurfaceDestory()
+//    }
+//    @CallSuper
+//    override fun beforeSurfaceDestory() {
+//        renderListener?.beforeSurfaceDestory()
+//    }
+//
+//    override fun onSurfaceCreated() {
+//        renderListener?.onSurfaceCreated()
+//    }
+//
+//    override fun onGLDestroy() {
+//        renderListener?.onGLDestroy()
+//    }
 
     override fun enqueueTask(runnable: Runnable) {
         if (Thread.currentThread() == thread) {
@@ -133,6 +169,10 @@ abstract class AbsRender : IRender {
         }
     }
 
+    open fun renderReady(): Boolean {
+        return viewHeight > 0 && viewWidth > 0 && haveSurface
+    }
+
     inner class RenderHandler(looper: Looper) : Handler(looper) {
         override fun handleMessage(msg: Message) {
             handleTask()
@@ -142,18 +182,26 @@ abstract class AbsRender : IRender {
                         eglSurface = createWindowSurface(msg.obj)
                         makeCurrent(eglSurface)
                         haveSurface = true
+                        renderLock.lock()
+                        renderCondition.signal()
+                        renderLock.unlock()
                         onSurfaceCreated()
                     }
                     MSG_SURFACE_CHANGE -> {
                         viewWidth = msg.arg1
                         viewHeight = msg.arg2
                         onSurfaceChanged(viewWidth, viewHeight)
-                        requestRender()
+                        if (autoRender) {
+                            requestRender()
+                        }
                     }
                     MSG_SURFACE_DESTROY -> {
                         beforeSurfaceDestory()
-                        makeCurrent(EGL14.EGL_NO_SURFACE)
                         releaseSurface(eglSurface)
+                        makeCurrent(EGL14.EGL_NO_SURFACE)
+                        renderLock.lock()
+                        renderCondition.signal()
+                        renderLock.unlock()
                         eglSurface = null
                         viewWidth = 0
                         viewHeight = 0
@@ -175,13 +223,13 @@ abstract class AbsRender : IRender {
         }
     }
 
-    fun renderReady(): Boolean {
-        return viewHeight > 0 && viewWidth > 0 && haveSurface
-    }
 
     inner class GLThread : HandlerThread("GLThread") {
         override fun run() {
-            eglCore = EglCore(null, EglCore.FLAG_TRY_GLES3).apply {
+            eglCore = EglCore(
+                null, EglCore.FLAG_TRY_GLES3
+                        or EglCore.FLAG_RECORDABLE
+            ).apply {
                 makeCurrent(EGL14.EGL_NO_SURFACE)
             }
             onGLCreated()

@@ -25,7 +25,7 @@ class Camera1(context: Context) : AbsCamera(context), Camera.PreviewCallback {
 
     //    surfaceTexture: SurfaceTexture
     init {
-        mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK
+        mCameraId = CameraInfo.CAMERA_FACING_BACK
     }
 
     override fun openCamera() {
@@ -215,7 +215,7 @@ class Camera1(context: Context) : AbsCamera(context), Camera.PreviewCallback {
         mCameraId = if (isFont()) {
             Camera.CameraInfo.CAMERA_FACING_FRONT
         } else {
-            Camera.CameraInfo.CAMERA_FACING_BACK
+            CameraInfo.CAMERA_FACING_BACK
         }
         openCamera()
         startPreview(surfaceTexture)
