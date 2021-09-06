@@ -57,14 +57,15 @@ class CameraRender : AbsRender(), ICameraRender {
     }
 
     override fun onGLCreated() {
+        renderListener?.onGLCreated()
         oesFilter.onInit()
         displayFilter.onInit()
-        renderListener?.onSurfaceCreated()
         OpenGLUtils.checkGlError("")
 
     }
 
     override fun onSurfaceCreated() {
+        renderListener?.onSurfaceCreated()
         GLES20.glGenTextures(1, oesTextureId, 0)
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, oesTextureId[0])
         GLES20.glTexParameteri(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST)

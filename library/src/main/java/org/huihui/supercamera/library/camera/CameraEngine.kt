@@ -137,6 +137,7 @@ class CameraEngine(
         if (event == Lifecycle.Event.ON_RESUME) {
 //            startPreview()
         } else if (event == Lifecycle.Event.ON_PAUSE) {
+            stopRecord()
             stopPreview()
         }
     }

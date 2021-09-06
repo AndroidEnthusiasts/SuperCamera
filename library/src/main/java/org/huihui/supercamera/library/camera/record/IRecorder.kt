@@ -18,7 +18,7 @@ interface IRecorder {
 
         fun onRecordStart()
 
-        fun onRecordDuration()
+        fun onRecordDuration(duration: Long)
 
         fun onRecordEnd()
     }

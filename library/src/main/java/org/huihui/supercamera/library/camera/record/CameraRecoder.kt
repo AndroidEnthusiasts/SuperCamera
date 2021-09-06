@@ -38,7 +38,7 @@ class CameraRecoder : IRecorder, AVRecorderListener {
     private var recording = false
     private var muxerStart = false
     private var stoping = false
-
+    var recorderListener: IRecorder.RecorderListener? = null
     var savePath = ""
 
     init {
@@ -120,6 +120,7 @@ class CameraRecoder : IRecorder, AVRecorderListener {
                     if (videoTrackId >= 0 && audioTrackId >= 0) {
                         start()
                         muxerStart = true
+                        recorderListener?.onRecordStart()
                     }
                 }
             }
@@ -141,6 +142,7 @@ class CameraRecoder : IRecorder, AVRecorderListener {
                         if (videoTrackId >= 0) {
                             Log.e(TAG, "writeVideoSampleData: ${bufferInfo.presentationTimeUs}")
                             writeSampleData(videoTrackId, data, bufferInfo)
+                            recorderListener?.onRecordDuration(bufferInfo.presentationTimeUs / 1000)
                         }
                     }
                 }
@@ -161,6 +163,7 @@ class CameraRecoder : IRecorder, AVRecorderListener {
                 stoping = false
                 release()
                 muxerStart = false
+                recorderListener?.onRecordEnd()
                 condition.signalAll()
             }
         }
@@ -169,8 +172,6 @@ class CameraRecoder : IRecorder, AVRecorderListener {
     enum class RecordType {
         AUDIO, VIDEO
     }
-
-    class MuxerThread
 
 }
 
