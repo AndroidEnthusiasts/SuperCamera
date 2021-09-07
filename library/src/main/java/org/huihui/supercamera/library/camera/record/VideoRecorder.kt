@@ -5,7 +5,6 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.opengl.EGLContext
 import android.opengl.GLES20
-import android.opengl.GLES30
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
@@ -14,11 +13,8 @@ import org.huihui.supercamera.library.camera.egl.EglCore.FLAG_RECORDABLE
 import org.huihui.supercamera.library.camera.egl.EglCore.FLAG_TRY_GLES3
 import org.huihui.supercamera.library.camera.egl.WindowSurface
 import org.huihui.supercamera.library.camera.filter.DisplayFilter
-import org.huihui.supercamera.library.camera.filter.utils.OpenGLUtils
-import org.huihui.supercamera.library.util.loadAssertString
 import org.huihui.supercamera.library.util.lock
 import java.nio.ByteBuffer
-import java.nio.FloatBuffer
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 

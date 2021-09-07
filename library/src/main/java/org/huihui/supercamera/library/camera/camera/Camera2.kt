@@ -3,7 +3,8 @@ package org.huihui.supercamera.library.camera.camera
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.graphics.*
+import android.graphics.ImageFormat
+import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.ImageReader
 import android.os.Build
@@ -11,13 +12,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Size
 import android.view.Surface
-import android.view.SurfaceHolder
-import android.view.SurfaceView
 import androidx.annotation.RequiresApi
 import org.huihui.supercamera.library.util.ImageUtils
 import java.util.*
-import android.hardware.camera2.CameraAccessException
-import java.lang.Math.*
 import kotlin.math.abs
 
 

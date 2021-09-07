@@ -8,10 +8,10 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.Message
-import android.util.Log
 import android.view.Surface
 import androidx.annotation.CallSuper
 import org.huihui.supercamera.library.camera.egl.EglCore
+import org.huihui.supercamera.library.util.lock
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
@@ -67,6 +67,11 @@ abstract class AbsRender : IRender {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CREATE, surface))
         }
+        lock(renderLock) {
+            while (!haveSurface) {
+                renderCondition.await()
+            }
+        }
     }
 
     @CallSuper
@@ -74,6 +79,7 @@ abstract class AbsRender : IRender {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CHANGE, width, height))
         }
+
     }
 
     @CallSuper
@@ -81,11 +87,11 @@ abstract class AbsRender : IRender {
         renderHander?.apply {
             sendMessage(Message.obtain(this, MSG_SURFACE_CREATE, surfaceTexture))
         }
-        renderLock.lock()
-        while (!haveSurface) {
-            renderCondition.await()
+        lock(renderLock) {
+            while (!haveSurface) {
+                renderCondition.await()
+            }
         }
-        renderLock.unlock()
     }
 
     @CallSuper
@@ -94,12 +100,11 @@ abstract class AbsRender : IRender {
             sendMessage(Message.obtain(this, MSG_SURFACE_DESTROY))
         }
         //这里需要等待glsurface销毁 不然会有gl错误
-        renderLock.lock()
-        while (haveSurface) {
-            renderCondition.await()
+        lock(renderLock) {
+            while (haveSurface) {
+                renderCondition.await()
+            }
         }
-        renderLock.unlock()
-
     }
 
     override fun requestRender() {

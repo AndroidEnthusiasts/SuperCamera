@@ -1,6 +1,5 @@
 package org.huihui.supercamera.library.camera.camera
 
-import android.app.Activity
 import android.content.Context
 import android.graphics.SurfaceTexture
 import android.hardware.Camera

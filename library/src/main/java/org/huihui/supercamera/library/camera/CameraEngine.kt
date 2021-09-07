@@ -10,7 +10,6 @@ import org.huihui.supercamera.library.camera.preview.IPreview
 import org.huihui.supercamera.library.camera.record.CameraRecoder
 import org.huihui.supercamera.library.camera.record.VideoRecorder
 import org.huihui.supercamera.library.camera.record.VideoRecorder.Companion.BIT_RATE
-import org.huihui.supercamera.library.camera.record.VideoRecorder.Companion.FRAME_RATE
 import org.huihui.supercamera.library.camera.record.VideoRecorder.Companion.MIME_TYPE
 import org.huihui.supercamera.library.camera.render.CameraRender
 import org.huihui.supercamera.library.camera.render.ICameraRender
@@ -35,18 +34,15 @@ class CameraEngine(
     }
 
     private var mCamera: ICamera = camera
-
     private var mRender: ICameraRender = render
-
     private var mPreview: IPreview = preview
-
     private var cameraRecorder = CameraRecoder()
+
     private var textureWidth: Int = 0
     private var textureHeight: Int = 0
+
     private var isPreview = false
-
     private var previewRunning = false
-
     private var isRecord = false
 
     /**

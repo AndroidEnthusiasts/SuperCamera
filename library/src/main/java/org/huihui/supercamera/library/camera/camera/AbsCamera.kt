@@ -1,7 +1,6 @@
 package org.huihui.supercamera.library.camera.camera
 
 import android.content.Context
-import android.graphics.SurfaceTexture
 
 /*
  * @Description: 

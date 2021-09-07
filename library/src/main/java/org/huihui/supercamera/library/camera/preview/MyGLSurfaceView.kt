@@ -6,11 +6,8 @@ import android.graphics.SurfaceTexture
 import android.opengl.GLES30
 import android.opengl.GLSurfaceView
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import android.util.AttributeSet
 import android.view.SurfaceHolder
-import android.view.View.MeasureSpec
 import androidx.annotation.RequiresApi
 import org.huihui.supercamera.library.camera.camera.Camera2
 import org.huihui.supercamera.library.camera.camera.CameraFilter

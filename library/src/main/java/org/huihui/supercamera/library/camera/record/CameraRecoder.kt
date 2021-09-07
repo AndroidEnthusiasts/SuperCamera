@@ -3,15 +3,11 @@ package org.huihui.supercamera.library.camera.record
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.media.MediaMuxer
-import android.os.Environment
 import android.util.Log
 import org.huihui.supercamera.library.camera.record.CameraRecoder.RecordType
 import org.huihui.supercamera.library.util.lock
-import java.lang.Exception
 import java.nio.ByteBuffer
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 /*
